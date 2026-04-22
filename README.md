@@ -72,7 +72,7 @@ flask --app flaskr run --debug
 | UI Evaluation 对照组 | same algorithm + no explanation | http://127.0.0.1:5000/?algorithm=enhanced&explain=false |
 | UI Evaluation 实验组 | same algorithm + explanation UI | http://127.0.0.1:5000/?algorithm=enhanced&explain=true |
 
-报告中建议明确说明：Qwen 只用于 natural-language preference parsing 和 recommendation explanation，是界面与解释性增强，不属于核心推荐排序算法。
+说明：Qwen 只用于 natural-language preference parsing 和 recommendation explanation，是界面与解释性增强，不属于核心推荐排序算法。
 
 ### 项目结构
 
@@ -186,7 +186,7 @@ The legacy parameter `version=enhanced|baseline` is still supported, but the fol
 | UI Evaluation Control Group | same algorithm + no explanation | http://127.0.0.1:5000/?algorithm=enhanced&explain=false |
 | UI Evaluation Experiment Group | same algorithm + explanation UI | http://127.0.0.1:5000/?algorithm=enhanced&explain=true |
 
-In the report, it is recommended to clarify that Qwen is used only for natural-language preference parsing and recommendation explanation. It is an interface and explainability enhancement, not part of the core ranking algorithm.
+It is recommended to clarify that Qwen is used only for natural-language preference parsing and recommendation explanation. It is an interface and explainability enhancement, not part of the core ranking algorithm.
 
 ### Project Structure
 
