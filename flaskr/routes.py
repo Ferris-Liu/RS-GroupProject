@@ -43,7 +43,7 @@ def parse_preference():
     data = request.json
     user_input = data.get("text", "")
     if not user_input:
-        return jsonify({"error": "输入不能为空"}), 400
+        return jsonify({"error": "Input cannot be empty."}), 400
 
     parsed = parse_user_preference(user_input)
     return jsonify(parsed)

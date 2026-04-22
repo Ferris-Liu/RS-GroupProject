@@ -7,7 +7,7 @@ createApp({
       currentPage: "preference",   // preference | rating | result
       isLoading:     false,
       isLoadingMore: false,
-      loadingText:   "正在处理...",
+      loadingText:   "Working...",
 
       // ── 偏好选择 ──
       inputMode:     "select",     // select | text
@@ -116,7 +116,7 @@ createApp({
     async parseNLInput() {
       if (!this.nlInput.trim()) return;
       this.isLoading  = true;
-      this.loadingText = "正在理解你的描述...";
+      this.loadingText = "Understanding your description...";
       try {
         const res  = await fetch("/api/parse-preference", {
           method: "POST",
@@ -126,8 +126,8 @@ createApp({
         const data = await res.json();
         this.parsedGenres = data.genres || [];
       } catch (e) {
-        console.error("解析失败", e);
-        alert("解析失败，请尝试手动选择类型");
+        console.error("Failed to parse preference", e);
+        alert("Could not understand that description. Please try selecting genres manually.");
       } finally {
         this.isLoading = false;
       }
@@ -140,7 +140,7 @@ createApp({
     async goToRating() {
       if (this.effectiveGenres.length === 0) return;
       this.isLoading  = true;
-      this.loadingText = "正在筛选电影...";
+      this.loadingText = "Finding movies for you...";
       try {
         const res  = await fetch("/api/sample-movies", {
           method: "POST",
@@ -152,7 +152,7 @@ createApp({
         this.currentPage  = "rating";
       } catch (e) {
         console.error(e);
-        alert("获取电影列表失败，请重试");
+        alert("Could not load the movie list. Please try again.");
       } finally {
         this.isLoading = false;
       }
@@ -161,7 +161,7 @@ createApp({
     async submitRatings() {
       if (this.ratedCount < 3) return;
       this.isLoading  = true;
-      this.loadingText = "正在为你生成推荐，请稍候...";
+      this.loadingText = "Generating your recommendations...";
 
       const ratings = Object.entries(this.userRatings)
         .filter(([, v]) => v > 0)
@@ -185,7 +185,7 @@ createApp({
         this.currentPage  = "result";
       } catch (e) {
         console.error(e);
-        alert("获取推荐失败，请重试");
+        alert("Could not get recommendations. Please try again.");
       } finally {
         this.isLoading = false;
       }

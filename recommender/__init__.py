@@ -16,7 +16,7 @@ def get_movie_df() -> pd.DataFrame:
         _movie_df = pd.read_csv(path, index_col=0)
         # 确保genres字段存在
         if "genres" not in _movie_df.columns:
-            raise ValueError("movie_info.csv 缺少 genres 列")
+            raise ValueError("movie_info.csv is missing the genres column.")
         _movie_df["overview"] = _movie_df.get("overview", "").fillna("")
     return _movie_df
 

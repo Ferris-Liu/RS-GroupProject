@@ -83,7 +83,7 @@ def get_recommendations(
                 try:
                     results.append(future.result())
                 except Exception as e:
-                    print(f"[理由生成失败] {e}")
+                    print(f"[Reason generation failed] {e}")
                     movie = futures[future]
                     movie["reason"] = ""
                     results.append(movie)

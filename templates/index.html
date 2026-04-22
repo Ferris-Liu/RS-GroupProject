@@ -1,9 +1,9 @@
 <!DOCTYPE html>
-<html lang="zh-CN">
+<html lang="en">
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>CineMatch · 电影推荐</title>
+  <title>CineMatch · Movie Recommendations</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
@@ -226,13 +226,13 @@
     .poster img {
       position: absolute; inset: 0;
       width: 100%; height: 100%; object-fit: cover;
-      opacity: 0;                          /* 默认不可见，加载成功才显示 */
+      opacity: 0;
       transition: opacity .35s, transform .4s;
       z-index: 1;
     }
     .movie-card:hover .poster img { transform: scale(1.06); }
 
-    /* CSS-only fallback – 永远在下层，img 加载成功后被覆盖 */
+    /* CSS-only fallback：图片加载成功后会覆盖它 */
     .poster-fallback {
       position: absolute; inset: 0;
       display: flex; flex-direction: column;
@@ -248,7 +248,7 @@
     }
     /* 加载成功：淡入显示 */
     .poster img.loaded    { opacity: 1; }
-    /* 加载失败：彻底隐藏，fallback 自然显示 */
+    /* 加载失败：隐藏坏图，保留 fallback */
     .poster img.has-error { display: none; }
 
     /* Card body */
@@ -364,7 +364,7 @@
   <!-- ══ Hero ══ -->
   <header class="hero">
     <div class="hero-logo">Cine<em>Match</em></div>
-    <p class="hero-sub">告诉我们你的口味，我们为你精选</p>
+    <p class="hero-sub">Tell us your taste. We will find films that fit.</p>
   </header>
 
   <!-- ══ Step bar ══ -->
@@ -374,7 +374,7 @@
         <i v-if="currentPage==='rating'||currentPage==='result'" class="fa fa-check" style="font-size:.65rem"></i>
         <span v-else>1</span>
       </div>
-      <span>选择偏好</span>
+      <span>Choose Taste</span>
     </div>
     <div class="step-line"></div>
     <div class="step" :class="{ active: currentPage==='rating', done: currentPage==='result' }">
@@ -382,12 +382,12 @@
         <i v-if="currentPage==='result'" class="fa fa-check" style="font-size:.65rem"></i>
         <span v-else>2</span>
       </div>
-      <span>为电影评分</span>
+      <span>Rate Movies</span>
     </div>
     <div class="step-line"></div>
     <div class="step" :class="{ active: currentPage==='result' }">
       <div class="step-num">3</div>
-      <span>查看推荐</span>
+      <span>View Picks</span>
     </div>
   </nav>
 
@@ -397,16 +397,16 @@
   <div class="page" :class="{'is-active': currentPage === 'preference'}">
     <div class="section">
       <div class="wrap t-center">
-        <h2 class="title">你喜欢看什么电影？</h2>
-        <p class="subtitle">选择类型或直接描述，最多选 5 类</p>
+        <h2 class="title">What kind of movies do you like?</h2>
+        <p class="subtitle">Choose genres or describe your mood. Pick up to 5.</p>
 
         <!-- Mode toggle -->
         <div class="mode-toggle">
           <button class="mode-btn" :class="{active: inputMode==='select'}" @click="inputMode='select'">
-            <i class="fa fa-th-large"></i> 点选类型
+            <i class="fa fa-th-large"></i> Pick Genres
           </button>
           <button class="mode-btn" :class="{active: inputMode==='text'}" @click="inputMode='text'">
-            <i class="fa fa-comment-dots"></i> 自然语言
+            <i class="fa fa-comment-dots"></i> Describe It
           </button>
         </div>
 
@@ -421,34 +421,34 @@
             </span>
           </div>
           <p class="text-muted mt-4" v-if="selectedGenres.length > 0">
-            已选 {{ selectedGenres.length }}/5 · {{ selectedGenres.join('、') }}
+            Selected {{ selectedGenres.length }}/5 · {{ selectedGenres.join(', ') }}
           </p>
         </div>
 
         <!-- Mode B: natural language -->
         <div v-if="inputMode==='text'" style="text-align:left">
           <label style="font-size:.87rem;color:var(--text-2);display:block;margin-bottom:8px">
-            用一句话描述你想看的类型
+            Describe what you want to watch
           </label>
           <textarea class="nl-box" rows="3"
-                    placeholder="例如：我想看一部轻松搞笑的爱情片，最好有点温馨"
+                    placeholder="Example: I want a light, funny romantic movie with a warm feeling"
                     v-model="nlInput"></textarea>
           <div class="mt-4">
             <button class="btn btn-ghost" @click="parseNLInput" :disabled="!nlInput.trim()">
-              <i class="fa fa-wand-magic-sparkles"></i> 解析我的偏好
+              <i class="fa fa-wand-magic-sparkles"></i> Understand My Taste
             </button>
           </div>
 
           <!-- Parsed result -->
           <div class="parsed-box" v-if="parsedGenres.length > 0">
-            <p class="parsed-label">识别到的类型</p>
+            <p class="parsed-label">Detected Genres</p>
             <div class="genres-wrap mb-4" style="justify-content:flex-start">
               <span class="genre-chip selected" v-for="g in parsedGenres" :key="g">
                 {{ genreEmoji[g] }} {{ g }}
               </span>
             </div>
-            <p class="text-muted mb-4">如果不准确，可以修改后重新描述</p>
-            <button class="btn btn-ghost btn-sm" @click="parsedGenres=[];nlInput=''">重新描述</button>
+            <p class="text-muted mb-4">If this looks off, edit your description and try again.</p>
+            <button class="btn btn-ghost btn-sm" @click="parsedGenres=[];nlInput=''">Describe Again</button>
           </div>
         </div>
 
@@ -457,7 +457,7 @@
           <button class="btn btn-primary"
                   :disabled="effectiveGenres.length === 0"
                   @click="goToRating">
-            下一步：为电影评分 <i class="fa fa-arrow-right"></i>
+            Next: Rate Movies <i class="fa fa-arrow-right"></i>
           </button>
         </div>
       </div>
@@ -471,28 +471,28 @@
     <div class="section">
       <div class="wrap-lg">
         <div class="t-center mb-4">
-          <h2 class="title">为这些电影评分</h2>
-          <p class="subtitle">评分越多推荐越准确（至少 3 部）</p>
+          <h2 class="title">Rate These Movies</h2>
+          <p class="subtitle">More ratings make better recommendations. Rate at least 3.</p>
         </div>
 
         <!-- Stats bar -->
         <div class="stats-bar">
           <div class="stat-item">
             <div class="stat-num">{{ sampleMovies.length }}</div>
-            <div class="stat-lbl">待评电影</div>
+            <div class="stat-lbl">Movies</div>
           </div>
           <div class="stat-item">
             <div class="stat-num">{{ ratedCount }}</div>
-            <div class="stat-lbl">已评分</div>
+            <div class="stat-lbl">Rated</div>
           </div>
           <div class="stat-item">
             <div class="stat-num" :style="ratedCount >= 3 ? 'color:var(--success)' : ''">
-              {{ ratedCount >= 3 ? '✓ 可以提交' : `还差 ${3 - ratedCount} 部` }}
+              {{ ratedCount >= 3 ? '✓ Ready' : `${3 - ratedCount} more` }}
             </div>
-            <div class="stat-lbl">评分进度</div>
+            <div class="stat-lbl">Progress</div>
           </div>
           <button class="btn btn-primary" :disabled="ratedCount < 3" @click="submitRatings">
-            获取推荐 <i class="fa fa-star"></i>
+            Get Recommendations <i class="fa fa-star"></i>
           </button>
         </div>
 
@@ -513,7 +513,7 @@
             <div class="card-body">
               <div class="card-title" :title="movie.title">{{ movie.title }}</div>
               <div class="card-genres">{{ movie.genres.join(' · ') }}</div>
-              <!-- ★ 星级评分 -->
+              <!-- 星级评分 -->
               <div class="star-row"
                    @mouseleave="hoverRatings[movie.movie_id] = 0">
                 <div class="stars">
@@ -538,10 +538,10 @@
 
         <div class="flex-center mt-8">
           <button class="btn btn-primary" :disabled="ratedCount < 3" @click="submitRatings">
-            获取推荐 <i class="fa fa-star"></i>
+            Get Recommendations <i class="fa fa-star"></i>
           </button>
           <button class="btn btn-ghost" @click="currentPage='preference'">
-            <i class="fa fa-arrow-left"></i> 返回
+            <i class="fa fa-arrow-left"></i> Back
           </button>
         </div>
       </div>
@@ -555,35 +555,35 @@
     <div class="section">
       <div class="wrap-lg">
         <div class="t-center mb-4">
-          <h2 class="title">🎯 为你推荐</h2>
-          <p class="subtitle">基于你的口味精选 · 点击喜欢发现更多</p>
+          <h2 class="title">🎯 Your Recommendations</h2>
+          <p class="subtitle">Curated around your taste. Like movies to discover more.</p>
         </div>
 
         <!-- Stats bar -->
         <div class="stats-bar">
           <div class="stat-item">
             <div class="stat-num">{{ recommendations.length }}</div>
-            <div class="stat-lbl">推荐电影</div>
+            <div class="stat-lbl">Recommendations</div>
           </div>
           <div class="stat-item">
             <div class="stat-num" style="color:var(--success)">{{ likedIds.length }}</div>
-            <div class="stat-lbl">已喜欢</div>
+            <div class="stat-lbl">Liked</div>
           </div>
           <div class="stat-item">
             <div class="stat-num" style="color:var(--text-3)">{{ dislikedIds.length }}</div>
-            <div class="stat-lbl">已过滤</div>
+            <div class="stat-lbl">Hidden</div>
           </div>
           <button class="btn btn-primary" v-if="likedIds.length > 0"
                   @click="fetchFeedbackRecs" :disabled="isLoadingMore">
             <i class="fa fa-rotate" :class="{'fa-spin': isLoadingMore}"></i>
-            {{ isLoadingMore ? '推荐中…' : '基于喜好发现更多' }}
+            {{ isLoadingMore ? 'Finding more...' : 'Find More Like These' }}
           </button>
         </div>
 
         <!-- Main recs -->
         <div class="section-header">
           <div class="section-header-line"></div>
-          <span class="section-header-label">协同过滤推荐</span>
+          <span class="section-header-label">Collaborative Filtering Picks</span>
           <div class="section-header-line"></div>
         </div>
 
@@ -604,7 +604,7 @@
               <div class="card-genres">{{ movie.genres.join(' · ') }}</div>
               <div class="card-score" v-if="movie.predicted_score">
                 <i class="fa fa-star" style="font-size:.7rem"></i>
-                预测 {{ movie.predicted_score }}
+                Predicted {{ movie.predicted_score }}
               </div>
               <div class="reason-box" v-if="movie.reason">
                 💡 {{ movie.reason }}
@@ -614,7 +614,7 @@
                         :class="{ liked: likedIds.includes(movie.movie_id) }"
                         @click="likeMovie(movie.movie_id)">
                   <i class="fa fa-thumbs-up"></i>
-                  {{ likedIds.includes(movie.movie_id) ? '已喜欢' : '喜欢' }}
+                  {{ likedIds.includes(movie.movie_id) ? 'Liked' : 'Like' }}
                 </button>
                 <button class="btn-dislike" @click="dislikeMovie(movie.movie_id)">
                   <i class="fa fa-thumbs-down"></i>
@@ -628,7 +628,7 @@
         <template v-if="feedbackRecs.length > 0">
           <div class="section-header mt-8">
             <div class="section-header-line"></div>
-            <span class="section-header-label">基于喜好的相似推荐</span>
+            <span class="section-header-label">Similar Picks Based on Likes</span>
             <div class="section-header-line"></div>
           </div>
           <div class="movies-grid">
@@ -648,7 +648,7 @@
                 <div class="card-genres">{{ movie.genres.join(' · ') }}</div>
                 <div class="card-score" v-if="movie.similarity">
                   <i class="fa fa-circle-nodes" style="font-size:.7rem"></i>
-                  相似度 {{ (movie.similarity * 100).toFixed(0) }}%
+                  Similarity {{ (movie.similarity * 100).toFixed(0) }}%
                 </div>
                 <div class="reason-box" v-if="movie.reason">
                   💡 {{ movie.reason }}
@@ -658,7 +658,7 @@
                           :class="{ liked: likedIds.includes(movie.movie_id) }"
                           @click="likeMovie(movie.movie_id)">
                     <i class="fa fa-thumbs-up"></i>
-                    {{ likedIds.includes(movie.movie_id) ? '已喜欢' : '喜欢' }}
+                    {{ likedIds.includes(movie.movie_id) ? 'Liked' : 'Like' }}
                   </button>
                   <button class="btn-dislike" @click="dislikeMovie(movie.movie_id)">
                     <i class="fa fa-thumbs-down"></i>
@@ -674,10 +674,10 @@
           <button class="btn btn-primary" v-if="likedIds.length > 0"
                   @click="fetchFeedbackRecs" :disabled="isLoadingMore">
             <i class="fa fa-rotate" :class="{'fa-spin': isLoadingMore}"></i>
-            {{ isLoadingMore ? '推荐中…' : '基于喜好发现更多' }}
+            {{ isLoadingMore ? 'Finding more...' : 'Find More Like These' }}
           </button>
           <button class="btn btn-ghost" @click="restart">
-            <i class="fa fa-arrow-rotate-left"></i> 重新开始
+            <i class="fa fa-arrow-rotate-left"></i> Start Over
           </button>
         </div>
       </div>
