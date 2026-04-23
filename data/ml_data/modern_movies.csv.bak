@@ -1,0 +1,51 @@
+movieId,title,genres,year,overview,cover_url,popularity
+900001,La La Land,Comedy|Drama|Romance|Music,2016,"A jazz pianist and an aspiring actress fall in love while chasing their dreams in Los Angeles, balancing romance with ambition and artistic compromise.",https://image.tmdb.org/t/p/w500/uDO8zWDhfWwoFdKS4fzkUJt0Rf0.jpg,92
+900002,Everything Everywhere All at Once,Action|Adventure|Comedy|Sci-Fi,2022,"A stressed laundromat owner is pulled into a multiverse adventure where family conflict, absurd action, and emotional healing collide.",https://image.tmdb.org/t/p/w500/w3LxiVYdWWRvEVdn5RYq6jIqkb1.jpg,96
+900003,Spider-Man: Across the Spider-Verse,Action|Adventure|Animation|Sci-Fi,2023,"Miles Morales travels across the multiverse and clashes with other Spider-heroes while deciding what kind of hero he wants to become.",https://image.tmdb.org/t/p/w500/8Vt6mWEReuy4Of61Lnj5Xj704m8.jpg,98
+900004,Dune: Part Two,Action|Adventure|Drama|Sci-Fi,2024,"Paul Atreides joins the Fremen and embraces a dangerous destiny while war, faith, and revenge reshape the desert planet Arrakis.",https://image.tmdb.org/t/p/w500/1pdfLvkbY9ohJlCjQH2CZjjYVvJ.jpg,97
+900005,Oppenheimer,Drama|Thriller,2023,"Physicist J. Robert Oppenheimer leads the Manhattan Project and faces the moral consequences of creating the atomic bomb.",https://image.tmdb.org/t/p/w500/8Gxv8gSFCU0XGDykEGv7zR1n2ua.jpg,95
+900006,Barbie,Adventure|Comedy|Fantasy,2023,"Barbie leaves her perfect plastic world for the real one, discovering identity, insecurity, and the strange rules of human society.",https://image.tmdb.org/t/p/w500/iuFNMS8U5cb6xfzi51Dbkovj7vM.jpg,94
+900007,Top Gun: Maverick,Action|Drama,2022,"An elite naval aviator returns to train a new generation of pilots for a nearly impossible mission while facing his past.",https://image.tmdb.org/t/p/w500/62HCnUTziyWcpDaBO2i1DX17ljH.jpg,93
+900008,The Batman,Action|Crime|Drama|Mystery,2022,"A young Batman investigates a string of murders in Gotham, uncovering corruption while confronting the city's darkest secrets.",https://image.tmdb.org/t/p/w500/74xTEgt7R36Fpooo50r9T25onhq.jpg,91
+900009,Parasite,Comedy|Drama|Thriller,2019,"A poor family infiltrates a wealthy household, leading to a sharp social satire that turns into a tense and unpredictable thriller.",https://image.tmdb.org/t/p/w500/7IiTTgloJzvGI1TAYymCfbfl3vT.jpg,94
+900010,Knives Out,Comedy|Crime|Mystery|Thriller,2019,"A detective investigates the suspicious death of a wealthy novelist, untangling family secrets with wit and classic whodunit style.",https://image.tmdb.org/t/p/w500/pThyQovXQrw2m0s9x82twj48Jq4.jpg,89
+900011,Get Out,Horror|Mystery|Thriller,2017,"A young man visits his girlfriend's family and discovers a disturbing secret beneath their polite suburban hospitality.",https://image.tmdb.org/t/p/w500/tFXcEccSQMf3lfhfXKSU9iRBpa3.jpg,90
+900012,Coco,Adventure|Animation|Children|Drama|Fantasy|Music,2017,"A music-loving boy journeys into the Land of the Dead and uncovers family history, memory, and the power of belonging.",https://image.tmdb.org/t/p/w500/gGEsBPAijhVUFoiNpgZXqRVWJt2.jpg,93
+900013,Encanto,Animation|Children|Comedy|Fantasy|Music,2021,"In a magical Colombian family, the only child without a gift may be the key to saving their enchanted home.",https://image.tmdb.org/t/p/w500/4j0PNHkMr5ax3IA8tjtxcmPU3QT.jpg,88
+900014,Soul,Adventure|Animation|Comedy|Drama|Fantasy|Music,2020,"A jazz musician separated from his body explores life, purpose, and the small moments that make existence meaningful.",https://image.tmdb.org/t/p/w500/hm58Jw4Lw8OIeECIq5qyPYhAeRJ.jpg,87
+900015,Past Lives,Drama|Romance,2023,"Two childhood friends reconnect across decades and continents, reflecting on love, timing, identity, and the lives they did not choose.",https://image.tmdb.org/t/p/w500/k3waqVXSnvCZWfJYNtdamTgTtTA.jpg,84
+900016,Poor Things,Comedy|Drama|Fantasy|Romance|Sci-Fi,2023,"A resurrected young woman travels through a surreal world, discovering freedom, desire, and selfhood on her own terms.",https://image.tmdb.org/t/p/w500/kCGlIMHnOm8JPXq3rXM6c5wMxcT.jpg,86
+900017,Godzilla Minus One,Action|Drama|Horror|Sci-Fi,2023,"Postwar Japan faces a devastating new threat as survivors confront trauma, guilt, and a monstrous force from the sea.",https://image.tmdb.org/t/p/w500/hkxxMIGaiCTmrEArK7J56JTKUlB.jpg,87
+900018,John Wick: Chapter 4,Action|Crime|Thriller,2023,"John Wick battles his way across the global underworld in a stylish, relentless fight for freedom from the High Table.",https://image.tmdb.org/t/p/w500/vZloFAK7NmvMGKE7VkF5UHaz0I.jpg,90
+900019,Black Panther,Action|Adventure|Sci-Fi,2018,"T'Challa returns to Wakanda as king and must defend his nation, legacy, and vision for the future from a powerful challenger.",https://image.tmdb.org/t/p/w500/uxzzxijgPIY7slzFvMotPv8wjKA.jpg,91
+900020,Avengers: Endgame,Action|Adventure|Drama|Sci-Fi,2019,"The surviving Avengers launch one final mission to undo cosmic devastation and bring closure to a decade of superhero storytelling.",https://image.tmdb.org/t/p/w500/or06FN3Dka5tukK1e9sl16pB3iy.jpg,95
+900021,Inside Out 2,Adventure|Animation|Comedy|Family,2024,"Riley enters her teenage years as new emotions arrive and challenge the balance inside her mind.",,92
+900022,The Wild Robot,Adventure|Animation|Drama|Family|Sci-Fi,2024,"A shipwrecked robot learns to survive in the wilderness and forms an unexpected bond with a young gosling.",,88
+900023,Challengers,Drama|Romance,2024,"Three tennis players navigate ambition, rivalry, and desire as old relationships collide on and off the court.",,86
+900024,Anora,Comedy|Drama|Romance,2024,"A young sex worker's whirlwind romance with the son of a Russian oligarch turns into a chaotic clash of class and power.",,84
+900025,Civil War,Action|Drama|Thriller|War,2024,"Journalists travel through a fractured near-future America while documenting violence, fear, and political collapse.",,85
+900026,A Quiet Place Part II,Drama|Horror|Sci-Fi|Thriller,2020,"A family surviving in silence faces new threats beyond their home after the world is overrun by sound-hunting creatures.",,86
+900027,Nope,Horror|Mystery|Sci-Fi|Thriller,2022,"Two siblings running a horse ranch investigate a mysterious phenomenon in the sky above their isolated valley.",,84
+900028,Midsommar,Drama|Horror|Mystery|Thriller,2019,"A grieving woman joins her boyfriend's trip to a remote Swedish festival that slowly reveals disturbing rituals.",,83
+900029,Hereditary,Drama|Horror|Mystery|Thriller,2018,"A family tragedy unleashes terrifying secrets and a sinister inheritance that grows more disturbing with every revelation.",,86
+900030,The Substance,Drama|Horror|Sci-Fi,2024,"An aging celebrity tries a mysterious body-enhancing treatment and spirals into a grotesque battle with identity and beauty standards.",,85
+900031,The Menu,Comedy|Horror|Thriller,2022,"Guests at an exclusive island restaurant discover that the chef's elaborate tasting menu has a deadly agenda.",,82
+900032,Glass Onion: A Knives Out Mystery,Comedy|Crime|Mystery|Thriller,2022,"Detective Benoit Blanc attends a billionaire's island gathering and uncovers layered motives behind a puzzle-like murder mystery.",,84
+900033,The Fall Guy,Action|Comedy|Romance,2024,"A stuntman gets pulled into a dangerous film-set conspiracy while trying to reconnect with the director he still loves.",,83
+900034,Mission: Impossible - Dead Reckoning Part One,Action|Adventure|Thriller,2023,"Ethan Hunt races against a powerful rogue AI while allies and enemies compete for control of a dangerous key.",,88
+900035,Furiosa: A Mad Max Saga,Action|Adventure|Sci-Fi|Thriller,2024,"Young Furiosa is taken from her homeland and fights her way through warlords, wastelands, and revenge.",,87
+900036,The Creator,Action|Adventure|Drama|Sci-Fi,2023,"A soldier in a future war against artificial intelligence protects a mysterious child who may change the conflict forever.",,80
+900037,Tenet,Action|Sci-Fi|Thriller,2020,"A secret agent manipulates time inversion to prevent a future attack that could destroy the present world.",,85
+900038,1917,Action|Drama|Thriller|War,2019,"Two young soldiers cross enemy territory during World War I to deliver a message that could save hundreds of lives.",,89
+900039,All Quiet on the Western Front,Action|Drama|War,2022,"A young German soldier experiences the brutality and disillusionment of World War I from the trenches.",,86
+900040,Minari,Drama,2020,"A Korean American family starts a farm in rural Arkansas and navigates hope, hardship, and belonging.",,82
+900041,Nomadland,Drama,2020,"A woman living as a modern nomad travels across the American West while rebuilding her life after loss.",,81
+900042,CODA,Comedy|Drama|Music,2021,"The hearing daughter of a Deaf family discovers her singing talent while balancing independence and family responsibility.",,84
+900043,"tick, tick... BOOM!",Drama|Music,2021,"An aspiring theater composer in New York races against time, ambition, and self-doubt before his thirtieth birthday.",,82
+900044,A Star Is Born,Drama|Music|Romance,2018,"A fading musician falls in love with a rising singer as fame, addiction, and insecurity strain their relationship.",,86
+900045,The Greatest Showman,Drama|Music,2017,"A visionary showman builds a dazzling entertainment spectacle while searching for acceptance, success, and family balance.",,83
+900046,The Holdovers,Comedy|Drama,2023,"A strict teacher, a grieving cook, and a lonely student spend winter break together and slowly form an unlikely bond.",,85
+900047,Aftersun,Drama,2022,"A woman reflects on a childhood holiday with her father, uncovering tender memories and hidden sadness.",,82
+900048,Turning Red,Animation|Comedy|Family|Fantasy,2022,"A confident teenage girl turns into a giant red panda whenever her emotions get too intense.",,84
+900049,Puss in Boots: The Last Wish,Adventure|Animation|Comedy|Family|Fantasy,2022,"Puss in Boots seeks a magical wish after discovering he has used eight of his nine lives.",,88
+900050,The Mitchells vs. The Machines,Adventure|Animation|Comedy|Family|Sci-Fi,2021,"A chaotic family road trip becomes humanity's last hope when a robot uprising threatens the world.",,86

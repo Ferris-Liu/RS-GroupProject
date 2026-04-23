@@ -37,6 +37,7 @@ createApp({
       feedbackSummary: [],         // 反馈后用于解释推荐列表变化的小面板
       likedIds:     [],
       dislikedIds:  [],
+      engineStatus: null,          // 后端返回的推荐引擎状态，用来判断是否走 fallback
 
       // ── 实验开关（从 URL 参数读取） ──
       version: "enhanced",
@@ -188,6 +189,7 @@ createApp({
         this.mainRecs     = data.recommendations || [];
         this.feedbackRecs = [];
         this.feedbackSummary = [];
+        this.engineStatus = data.engine_status || null;
         this.likedIds     = [];
         this.dislikedIds  = [];
         this.currentPage  = "result";
@@ -262,6 +264,7 @@ createApp({
       this.mainRecs     = [];
       this.feedbackRecs = [];
       this.feedbackSummary = [];
+      this.engineStatus = null;
       this.likedIds     = [];
       this.dislikedIds  = [];
     }

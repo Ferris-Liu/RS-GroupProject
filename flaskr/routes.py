@@ -115,20 +115,23 @@ def preferences():
     session["liked_ids"] = []
     session["include_reasons"] = include_reasons
 
-    results = get_recommendations(
+    result_payload = get_recommendations(
         user_ratings=data.get("ratings", []),
         user_genres=data.get("genres", []),
         algorithm=algorithm,
         include_reasons=include_reasons
     )
+    results = result_payload["recommendations"]
 
     shown_ids = [m["movie_id"] for m in results]
     session["shown_ids"] = shown_ids
+    session["engine_status"] = result_payload["engine_status"]
 
     return jsonify({
         "recommendations": results,
         "algorithm": algorithm,
-        "explain": include_reasons
+        "explain": include_reasons,
+        "engine_status": result_payload["engine_status"]
     })
 
 

@@ -113,6 +113,7 @@
       transition: all .2s;
     }
     .version-badge.is-enhanced { border-color: var(--accent); color: var(--accent); }
+    .version-badge.is-fallback { border-color: var(--danger); color: var(--danger); }
 
     /* ── Shared layout ── */
     .section { padding: 40px 20px; }
@@ -370,6 +371,25 @@
       border-radius: 999px; padding: 6px 10px;
     }
 
+    /* 推荐引擎状态 */
+    .engine-status {
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 14px 16px; margin-bottom: 22px;
+      display: flex; flex-wrap: wrap; gap: 10px; align-items: center;
+      color: var(--text-2); font-size: .8rem;
+    }
+    .engine-pill {
+      display: inline-flex; align-items: center; gap: 6px;
+      border-radius: 999px; padding: 6px 10px;
+      background: rgba(255,255,255,.06); border: 1px solid var(--border);
+      color: var(--text-2);
+    }
+    .engine-pill.ok { color: var(--success); border-color: rgba(74,222,128,.25); }
+    .engine-pill.warn { color: var(--danger); border-color: rgba(248,113,113,.28); }
+    .engine-warning { flex-basis: 100%; color: var(--danger); }
+
     /* ── Utilities ── */
     .mt-2 { margin-top: 8px;  }
     .mt-4 { margin-top: 16px; }
@@ -399,9 +419,13 @@
   </div>
 
   <!-- ══ Version badge ══ -->
-  <div class="version-badge" :class="{'is-enhanced': algorithm === 'enhanced'}">
+  <div class="version-badge" :class="{
+      'is-enhanced': algorithm === 'enhanced' && !(engineStatus && engineStatus.is_fallback),
+      'is-fallback': engineStatus && engineStatus.is_fallback
+    }">
     {{ algorithm === 'enhanced' ? 'Enhanced algorithm' : 'Baseline algorithm' }}
     · {{ explain ? 'Explain on' : 'Explain off' }}
+    <template v-if="engineStatus && engineStatus.is_fallback"> · Fallback</template>
   </div>
 
   <!-- ══ Hero ══ -->
@@ -621,6 +645,22 @@
             <i class="fa fa-rotate" :class="{'fa-spin': isLoadingMore}"></i>
             {{ isLoadingMore ? 'Finding more...' : 'Find More Like These' }}
           </button>
+        </div>
+
+        <div class="engine-status" v-if="engineStatus">
+          <span class="engine-pill" :class="engineStatus.is_fallback ? 'warn' : 'ok'">
+            <i class="fa" :class="engineStatus.is_fallback ? 'fa-triangle-exclamation' : 'fa-circle-check'"></i>
+            Ranking: {{ engineStatus.ranking_engine === 'knn_with_means' ? 'KNN With Means' : 'Fallback Popular' }}
+          </span>
+          <span class="engine-pill">
+            Modern picks: {{ engineStatus.modern_picks }}
+          </span>
+          <span class="engine-pill" :class="engineStatus.qwen_available ? 'ok' : 'warn'" v-if="engineStatus.explain_requested">
+            Qwen: {{ engineStatus.qwen_available ? 'Available' : 'Unavailable' }}
+          </span>
+          <div class="engine-warning" v-for="warning in engineStatus.warnings" :key="warning">
+            {{ warning }}
+          </div>
         </div>
 
         <div class="feedback-insight" v-if="feedbackSummary.length > 0">

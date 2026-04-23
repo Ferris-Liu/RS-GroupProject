@@ -1,13 +1,19 @@
 import os
 import json
 import re
-from openai import OpenAI
+
+try:
+    from openai import OpenAI
+except ModuleNotFoundError:
+    OpenAI = None
 
 # DashScope 兼容 OpenAI 接口，只需替换 base_url
 _client = None
 
 def _get_client() -> OpenAI:
     global _client
+    if OpenAI is None:
+        raise RuntimeError("openai package is not installed. Install requirements.txt to enable Qwen features.")
     if _client is None:
         api_key = os.getenv("DASHSCOPE_API_KEY")
         if not api_key:
@@ -21,6 +27,9 @@ def _get_client() -> OpenAI:
 
 def _call_qwen(messages: list[dict], max_tokens: int = 150, temperature: float = 0.6) -> str:
     """统一的 Qwen 调用入口，失败时静默返回空字符串"""
+    if OpenAI is None:
+        return ""
+
     try:
         client = _get_client()
         response = client.chat.completions.create(
@@ -33,6 +42,11 @@ def _call_qwen(messages: list[dict], max_tokens: int = 150, temperature: float =
     except Exception as e:
         print(f"[Qwen API error] {e}")
         return ""
+
+
+def is_qwen_available() -> bool:
+    """检查 Qwen 调用依赖是否可用"""
+    return OpenAI is not None and bool(os.getenv("DASHSCOPE_API_KEY"))
 
 
 # ────────────────────────────────────────────

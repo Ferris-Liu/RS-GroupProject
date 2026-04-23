@@ -1,8 +1,13 @@
 import pandas as pd
 import numpy as np
-from surprise import KNNWithMeans, Dataset, Reader
-from surprise import accuracy
 from . import get_ratings_df, get_movie_df
+
+try:
+    from surprise import KNNWithMeans, Dataset, Reader
+except ModuleNotFoundError:
+    KNNWithMeans = None
+    Dataset = None
+    Reader = None
 
 # 新用户使用固定的临时ID，不与原始数据集冲突
 NEW_USER_ID = 999999
@@ -44,6 +49,13 @@ def get_knn_recommendations(
     """
     ratings_df = get_ratings_df().copy()
     movie_df = get_movie_df()
+
+    if KNNWithMeans is None:
+        return {
+            "items": _fallback_popular_recommendations(user_ratings, movie_df, top_k),
+            "engine": "fallback_popular",
+            "warning": "scikit-surprise is not installed; using popularity fallback ranking."
+        }
 
     # 施加时间衰减
     if use_decay and "timestamp" in ratings_df.columns:
@@ -94,7 +106,36 @@ def get_knn_recommendations(
 
     # 按预测评分降序，取 Top-K
     predictions.sort(key=lambda x: x[1], reverse=True)
+    return {
+        "items": [
+            {"movie_id": mid, "predicted_score": round(score, 2)}
+            for mid, score in predictions[:top_k]
+        ],
+        "engine": "knn_with_means",
+        "warning": ""
+    }
+
+
+def _fallback_popular_recommendations(user_ratings: list, movie_df: pd.DataFrame, top_k: int) -> list:
+    """surprise 不可用时的兜底推荐，避免接口直接失败"""
+    rated_ids = {r["movie_id"] for r in user_ratings}
+    rating_stats = (
+        get_ratings_df()
+        .groupby("movieId")
+        .agg(avg_rating=("rating", "mean"), rating_count=("rating", "size"))
+        .reset_index()
+    )
+    rating_stats = rating_stats[rating_stats["rating_count"] >= 20]
+    rating_stats["score"] = rating_stats["avg_rating"] * np.log1p(rating_stats["rating_count"])
+
+    valid_ids = set(movie_df[movie_df.get("catalog_source", "movielens") != "modern"]["movieId"].tolist())
+    rating_stats = rating_stats[
+        rating_stats["movieId"].isin(valid_ids)
+        & ~rating_stats["movieId"].isin(rated_ids)
+    ]
+    rating_stats = rating_stats.sort_values("score", ascending=False).head(top_k)
+
     return [
-        {"movie_id": mid, "predicted_score": round(score, 2)}
-        for mid, score in predictions[:top_k]
+        {"movie_id": int(row["movieId"]), "predicted_score": round(float(row["avg_rating"]), 2)}
+        for _, row in rating_stats.iterrows()
     ]

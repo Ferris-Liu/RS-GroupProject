@@ -2,7 +2,7 @@ from concurrent.futures import ThreadPoolExecutor, as_completed
 from . import get_movie_df
 from .collaborative import get_knn_recommendations
 from .content_based import get_cbf
-from .llm_helper import generate_recommendation_reason
+from .llm_helper import generate_recommendation_reason, is_qwen_available
 
 
 LIGHT_HEARTED_GENRES = {"Comedy", "Romance", "Animation", "Family", "Music", "Musical"}
@@ -173,11 +173,12 @@ def get_recommendations(
     rated_ids = {int(r["movie_id"]) for r in user_ratings}
 
     # Step 1：协同过滤拿到Top-K ID和预测分
-    raw_results = get_knn_recommendations(
+    cf_result = get_knn_recommendations(
         user_ratings=user_ratings,
         top_k=12,
         use_decay=use_decay
     )
+    raw_results = cf_result["items"]
 
     # Step 2：补充电影完整信息
     enriched = []
@@ -225,14 +226,55 @@ def get_recommendations(
                     results.append(movie)
 
         # 按预测分重新排序（并发完成后顺序可能乱）
-        results.sort(key=lambda x: x.get("predicted_score", 0), reverse=True)
-        return results
+        results.sort(key=lambda x: x.get("predicted_score") or 0, reverse=True)
+        return {
+            "recommendations": results,
+            "engine_status": _build_engine_status(
+                algorithm=algorithm,
+                cf_result=cf_result,
+                include_reasons=include_reasons,
+                modern_count=len(modern_picks)
+            )
+        }
 
     # 不展示解释时直接返回，排序仍由推荐算法决定。
     for movie in enriched:
         movie["reason"] = ""
         movie["reason_tags"] = []
-    return enriched
+    return {
+        "recommendations": enriched,
+        "engine_status": _build_engine_status(
+            algorithm=algorithm,
+            cf_result=cf_result,
+            include_reasons=include_reasons,
+            modern_count=len(modern_picks)
+        )
+    }
+
+
+def _build_engine_status(
+    algorithm: str,
+    cf_result: dict,
+    include_reasons: bool,
+    modern_count: int
+) -> dict:
+    """返回前端可展示的推荐引擎状态，避免 fallback 静默发生"""
+    qwen_available = is_qwen_available()
+    warnings = []
+    if cf_result.get("warning"):
+        warnings.append(cf_result["warning"])
+    if include_reasons and not qwen_available:
+        warnings.append("Qwen/OpenAI dependency or API key is unavailable; natural-language reasons are disabled.")
+
+    return {
+        "algorithm": algorithm,
+        "ranking_engine": cf_result.get("engine", "unknown"),
+        "is_fallback": cf_result.get("engine") != "knn_with_means",
+        "explain_requested": include_reasons,
+        "qwen_available": qwen_available,
+        "modern_picks": modern_count,
+        "warnings": warnings
+    }
 
 
 def get_feedback_recommendations(
