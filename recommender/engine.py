@@ -7,6 +7,7 @@ from .llm_helper import generate_recommendation_reason
 
 LIGHT_HEARTED_GENRES = {"Comedy", "Romance", "Animation", "Family", "Music", "Musical"}
 INTENSE_GENRES = {"Action", "Thriller", "Crime", "Mystery", "Horror"}
+MODERN_PICK_COUNT = 4
 
 
 def _fetch_movie_info(movie_id: int) -> dict | None:
@@ -22,7 +23,9 @@ def _fetch_movie_info(movie_id: int) -> dict | None:
         "genres": str(r.get("genres", "")).split("|"),
         "year": str(r.get("year", "")),
         "poster_url": str(r.get("cover_url", "")),
-        "overview": str(r.get("overview", ""))
+        "overview": str(r.get("overview", "")),
+        "catalog_source": str(r.get("catalog_source", "movielens")),
+        "popularity": float(r.get("popularity", 0) or 0)
     }
 
 
@@ -64,6 +67,9 @@ def _build_reason_tags(
     movie_genres = set(movie.get("genres", []))
     matched_genres = [genre for genre in user_genres if genre in movie_genres]
 
+    if movie.get("catalog_source") == "modern":
+        tags.append("Fresh pick")
+
     if matched_genres:
         tags.append(f"Matched genre: {', '.join(matched_genres[:2])}")
 
@@ -88,6 +94,62 @@ def _build_reason_tags(
     return tags[:4]
 
 
+def _score_modern_movie(movie: dict, user_genres: list) -> float:
+    """为冷启动新片计算简单内容匹配分"""
+    movie_genres = set(movie.get("genres", []))
+    user_genre_set = set(user_genres)
+    matched_count = len(movie_genres & user_genre_set)
+
+    try:
+        year = float(movie.get("year") or 0)
+    except ValueError:
+        year = 0
+
+    popularity = float(movie.get("popularity", 0) or 0)
+    recency_bonus = max(0, year - 2015) / 10
+    genre_score = matched_count * 3
+    popularity_bonus = popularity / 100
+
+    return round(genre_score + recency_bonus + popularity_bonus, 4)
+
+
+def _get_modern_recommendations(
+    user_genres: list,
+    exclude_ids: set,
+    include_reasons: bool,
+    top_k: int = MODERN_PICK_COUNT
+) -> list:
+    """从增量新片池中选出冷启动推荐"""
+    movie_df = get_movie_df()
+    modern_df = movie_df[movie_df.get("catalog_source", "") == "modern"]
+
+    candidates = []
+    for _, row in modern_df.iterrows():
+        movie_id = int(row["movieId"])
+        if movie_id in exclude_ids:
+            continue
+
+        movie = _fetch_movie_info(movie_id)
+        if not movie:
+            continue
+
+        cold_start_score = _score_modern_movie(movie, user_genres)
+        movie["predicted_score"] = None
+        movie["cold_start_score"] = cold_start_score
+        movie["reason"] = ""
+        movie["reason_tags"] = (
+            _build_reason_tags(movie=movie, user_genres=user_genres)
+            if include_reasons else []
+        )
+        candidates.append(movie)
+
+    candidates.sort(
+        key=lambda m: (m.get("cold_start_score", 0), float(m.get("year") or 0)),
+        reverse=True
+    )
+    return candidates[:top_k]
+
+
 def get_recommendations(
     user_ratings: list,
     user_genres: list,
@@ -108,6 +170,7 @@ def get_recommendations(
     """
     use_decay = (algorithm == "enhanced")
     high_rated_titles = _high_rated_titles(user_ratings)
+    rated_ids = {int(r["movie_id"]) for r in user_ratings}
 
     # Step 1：协同过滤拿到Top-K ID和预测分
     raw_results = get_knn_recommendations(
@@ -122,12 +185,27 @@ def get_recommendations(
         info = _fetch_movie_info(item["movie_id"])
         if info:
             info["predicted_score"] = item["predicted_score"]
-            info["reason_tags"] = _build_reason_tags(
-                movie=info,
-                user_genres=user_genres,
-                high_rated_titles=high_rated_titles
+            info["reason_tags"] = (
+                _build_reason_tags(
+                    movie=info,
+                    user_genres=user_genres,
+                    high_rated_titles=high_rated_titles
+                )
+                if include_reasons else []
             )
             enriched.append(info)
+
+    # Step 2.5：混入少量 modern cold-start 推荐，不改动原始数据集和评分矩阵
+    used_ids = rated_ids | {movie["movie_id"] for movie in enriched}
+    modern_picks = _get_modern_recommendations(
+        user_genres=user_genres,
+        exclude_ids=used_ids,
+        include_reasons=include_reasons,
+        top_k=MODERN_PICK_COUNT
+    )
+    if modern_picks:
+        old_pick_count = max(0, 12 - len(modern_picks))
+        enriched = enriched[:old_pick_count] + modern_picks
 
     # Step 3：可选解释增强。LLM 不参与核心推荐排序，便于单独做 UI 评测。
     if include_reasons and enriched:
@@ -153,6 +231,7 @@ def get_recommendations(
     # 不展示解释时直接返回，排序仍由推荐算法决定。
     for movie in enriched:
         movie["reason"] = ""
+        movie["reason_tags"] = []
     return enriched
 
 
@@ -187,11 +266,14 @@ def get_feedback_recommendations(
         if info:
             info["similarity"] = item["similarity"]
             info["predicted_score"] = None
-            info["reason_tags"] = _build_reason_tags(
-                movie=info,
-                user_genres=user_genres,
-                high_rated_titles=liked_titles,
-                from_feedback=True
+            info["reason_tags"] = (
+                _build_reason_tags(
+                    movie=info,
+                    user_genres=user_genres,
+                    high_rated_titles=liked_titles,
+                    from_feedback=True
+                )
+                if include_reasons else []
             )
             enriched.append(info)
 
@@ -216,4 +298,5 @@ def get_feedback_recommendations(
 
     for movie in enriched:
         movie["reason"] = ""
+        movie["reason_tags"] = []
     return enriched
