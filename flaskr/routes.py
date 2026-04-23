@@ -1,4 +1,5 @@
 import random
+from collections import Counter
 from flask import Blueprint, request, jsonify, render_template, session
 from recommender.engine import get_recommendations, get_feedback_recommendations
 from recommender.llm_helper import parse_user_preference
@@ -27,6 +28,55 @@ def _experiment_flags():
 
     include_reasons = _parse_bool(explain, default=(version != "baseline"))
     return algorithm, include_reasons
+
+
+def _movie_by_id(movie_id):
+    """根据 movieId 查找电影记录"""
+    movie_df = get_movie_df()
+    row = movie_df[movie_df["movieId"] == movie_id]
+    if row.empty:
+        return None
+    return row.iloc[0]
+
+
+def _format_genre_phrase(genres):
+    """把类型列表格式化成适合面板展示的短语"""
+    if not genres:
+        return ""
+    if len(genres) == 1:
+        return genres[0]
+    return f"{', '.join(genres[:-1])} and {genres[-1]}"
+
+
+def _top_genres_from_movies(movie_ids, limit=2):
+    """统计一组电影里最常见的类型"""
+    counter = Counter()
+    for movie_id in movie_ids:
+        row = _movie_by_id(movie_id)
+        if row is None:
+            continue
+        counter.update(str(row.get("genres", "")).split("|"))
+    return [genre for genre, _ in counter.most_common(limit) if genre]
+
+
+def _feedback_summary(liked_ids, disliked_ids, new_recs):
+    """生成反馈后展示在推荐列表上方的更新说明"""
+    bullets = []
+    new_genres = _top_genres_from_movies([m["movie_id"] for m in new_recs], limit=2)
+    disliked_genres = _top_genres_from_movies(disliked_ids, limit=1)
+
+    if new_genres:
+        bullets.append(f"More {_format_genre_phrase(new_genres)}")
+
+    if disliked_genres:
+        bullets.append(f"Fewer {disliked_genres[0]} titles")
+
+    if liked_ids:
+        row = _movie_by_id(liked_ids[-1])
+        if row is not None:
+            bullets.append(f"More movies similar to {row.get('title', 'your liked picks')}")
+
+    return bullets[:3]
 
 
 @bp.route("/")
@@ -89,11 +139,15 @@ def feedback():
     """
     data = request.json
     liked_ids = data.get("liked_movie_ids", [])
+    disliked_ids = data.get("disliked_movie_ids", [])
 
     # 更新session中的liked列表
     current_liked = session.get("liked_ids", [])
-    current_liked = list(set(current_liked + liked_ids))
+    for movie_id in liked_ids:
+        if movie_id not in current_liked:
+            current_liked.append(movie_id)
     session["liked_ids"] = current_liked
+    session["disliked_ids"] = disliked_ids
 
     new_recs = get_feedback_recommendations(
         liked_ids=current_liked,
@@ -106,7 +160,10 @@ def feedback():
     new_shown = [m["movie_id"] for m in new_recs]
     session["shown_ids"] = session.get("shown_ids", []) + new_shown
 
-    return jsonify({"recommendations": new_recs})
+    return jsonify({
+        "recommendations": new_recs,
+        "feedback_summary": _feedback_summary(current_liked, disliked_ids, new_recs)
+    })
 
 
 @bp.route("/api/sample-movies", methods=["POST"])

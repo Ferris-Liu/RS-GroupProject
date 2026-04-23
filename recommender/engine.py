@@ -5,6 +5,10 @@ from .content_based import get_cbf
 from .llm_helper import generate_recommendation_reason
 
 
+LIGHT_HEARTED_GENRES = {"Comedy", "Romance", "Animation", "Family", "Music", "Musical"}
+INTENSE_GENRES = {"Action", "Thriller", "Crime", "Mystery", "Horror"}
+
+
 def _fetch_movie_info(movie_id: int) -> dict | None:
     """根据ID从movie_info.csv获取完整电影信息"""
     movie_df = get_movie_df()
@@ -36,6 +40,54 @@ def _enrich_with_reason(movie: dict, user_genres: list) -> dict:
     return movie
 
 
+def _high_rated_titles(user_ratings: list) -> list[str]:
+    """提取用户高分电影标题，用于解释标签"""
+    titles = []
+    for rating in user_ratings:
+        if float(rating.get("rating", 0)) < 4:
+            continue
+        movie = _fetch_movie_info(rating.get("movie_id"))
+        if movie:
+            titles.append(movie["title"])
+    return titles[:2]
+
+
+def _build_reason_tags(
+    movie: dict,
+    user_genres: list,
+    high_rated_titles: list[str] | None = None,
+    from_feedback: bool = False
+) -> list[str]:
+    """为卡片生成结构化推荐原因标签"""
+    tags = []
+    user_genre_set = set(user_genres)
+    movie_genres = set(movie.get("genres", []))
+    matched_genres = [genre for genre in user_genres if genre in movie_genres]
+
+    if matched_genres:
+        tags.append(f"Matched genre: {', '.join(matched_genres[:2])}")
+
+    if high_rated_titles and from_feedback:
+        tags.append("Similar to movies you liked")
+    elif high_rated_titles:
+        tags.append("Similar to movies you rated highly")
+
+    if movie_genres & user_genre_set & LIGHT_HEARTED_GENRES:
+        tags.append("Fits your light-hearted preference")
+    elif movie_genres & user_genre_set & INTENSE_GENRES:
+        tags.append("Fits your intense-watch preference")
+
+    if from_feedback:
+        tags.append("Based on your recent feedback")
+    elif movie.get("predicted_score") and movie["predicted_score"] >= 4:
+        tags.append("High predicted rating")
+
+    if movie.get("similarity") and "Similar to movies you liked" not in tags:
+        tags.append("Similar to movies you liked")
+
+    return tags[:4]
+
+
 def get_recommendations(
     user_ratings: list,
     user_genres: list,
@@ -55,6 +107,7 @@ def get_recommendations(
         电影信息列表；include_reasons=True 时附带 reason 字段
     """
     use_decay = (algorithm == "enhanced")
+    high_rated_titles = _high_rated_titles(user_ratings)
 
     # Step 1：协同过滤拿到Top-K ID和预测分
     raw_results = get_knn_recommendations(
@@ -69,6 +122,11 @@ def get_recommendations(
         info = _fetch_movie_info(item["movie_id"])
         if info:
             info["predicted_score"] = item["predicted_score"]
+            info["reason_tags"] = _build_reason_tags(
+                movie=info,
+                user_genres=user_genres,
+                high_rated_titles=high_rated_titles
+            )
             enriched.append(info)
 
     # Step 3：可选解释增强。LLM 不参与核心推荐排序，便于单独做 UI 评测。
@@ -111,6 +169,12 @@ def get_feedback_recommendations(
         6部新推荐电影；include_reasons=True 时附带理由
     """
     cbf = get_cbf()
+    liked_titles = []
+    for movie_id in liked_ids:
+        movie = _fetch_movie_info(movie_id)
+        if movie:
+            liked_titles.append(movie["title"])
+
     cbf_results = cbf.get_recommendations(
         liked_movie_ids=liked_ids,
         exclude_ids=exclude_ids,
@@ -123,6 +187,12 @@ def get_feedback_recommendations(
         if info:
             info["similarity"] = item["similarity"]
             info["predicted_score"] = None
+            info["reason_tags"] = _build_reason_tags(
+                movie=info,
+                user_genres=user_genres,
+                high_rated_titles=liked_titles,
+                from_feedback=True
+            )
             enriched.append(info)
 
     # 可选解释增强。内容过滤负责排序，LLM 只负责展示文案。

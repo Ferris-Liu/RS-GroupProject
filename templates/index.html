@@ -267,6 +267,19 @@
       color: var(--accent); font-size: .78rem; font-weight: 600; margin-top: 6px;
     }
 
+    /* 结构化解释标签 */
+    .reason-tags {
+      display: flex; flex-wrap: wrap; gap: 6px; margin-top: 9px;
+    }
+    .reason-tag {
+      display: inline-flex; align-items: center; gap: 5px;
+      padding: 5px 8px; border-radius: 999px;
+      background: rgba(96,165,250,.10);
+      border: 1px solid rgba(96,165,250,.18);
+      color: #bfd7ff; font-size: .66rem; line-height: 1.25;
+    }
+    .reason-tag i { font-size: .62rem; color: var(--info); }
+
     /* Reason */
     .reason-box {
       background: rgba(245,197,24,.06); border-left: 2px solid var(--accent);
@@ -313,6 +326,9 @@
     .btn-dislike:hover {
       background: rgba(248,113,113,.1); border-color: var(--danger); color: var(--danger);
     }
+    .btn-dislike.disliked {
+      background: rgba(248,113,113,.1); border-color: var(--danger); color: var(--danger);
+    }
 
     /* ── Divider ── */
     .divider { height: 1px; background: var(--border); margin: 32px 0; }
@@ -325,6 +341,33 @@
     .section-header-label {
       font-size: .8rem; color: var(--text-3); white-space: nowrap; font-weight: 500;
       text-transform: uppercase; letter-spacing: .06em;
+    }
+
+    /* 反馈解释面板 */
+    .feedback-insight {
+      background: linear-gradient(135deg, rgba(74,222,128,.10), rgba(96,165,250,.08));
+      border: 1px solid rgba(74,222,128,.20);
+      border-radius: var(--radius);
+      padding: 16px 18px; margin-bottom: 26px;
+      display: flex; align-items: flex-start; gap: 14px;
+    }
+    .feedback-insight-icon {
+      width: 34px; height: 34px; border-radius: 50%;
+      display: flex; align-items: center; justify-content: center;
+      background: rgba(74,222,128,.14); color: var(--success);
+      flex: 0 0 auto;
+    }
+    .feedback-insight-title {
+      font-size: .92rem; font-weight: 700; margin-bottom: 8px;
+    }
+    .feedback-insight ul {
+      list-style: none; display: flex; flex-wrap: wrap; gap: 8px; padding: 0; margin: 0;
+    }
+    .feedback-insight li {
+      color: var(--text-2); font-size: .78rem;
+      background: rgba(255,255,255,.06);
+      border: 1px solid var(--border);
+      border-radius: 999px; padding: 6px 10px;
     }
 
     /* ── Utilities ── */
@@ -580,6 +623,18 @@
           </button>
         </div>
 
+        <div class="feedback-insight" v-if="feedbackSummary.length > 0">
+          <div class="feedback-insight-icon">
+            <i class="fa fa-sliders"></i>
+          </div>
+          <div>
+            <div class="feedback-insight-title">Updated based on your feedback</div>
+            <ul>
+              <li v-for="item in feedbackSummary" :key="item">{{ item }}</li>
+            </ul>
+          </div>
+        </div>
+
         <!-- Main recs -->
         <div class="section-header">
           <div class="section-header-line"></div>
@@ -588,7 +643,7 @@
         </div>
 
         <div class="movies-grid">
-          <div class="movie-card" v-for="movie in mainRecs" :key="movie.movie_id">
+          <div class="movie-card" v-for="movie in visibleMainRecs" :key="movie.movie_id">
             <div class="poster">
               <div class="poster-fallback">
                 <i class="fa fa-film"></i>
@@ -606,6 +661,11 @@
                 <i class="fa fa-star" style="font-size:.7rem"></i>
                 Predicted {{ movie.predicted_score }}
               </div>
+              <div class="reason-tags" v-if="movie.reason_tags && movie.reason_tags.length">
+                <span class="reason-tag" v-for="tag in movie.reason_tags" :key="tag">
+                  <i class="fa fa-check"></i>{{ tag }}
+                </span>
+              </div>
               <div class="reason-box" v-if="movie.reason">
                 💡 {{ movie.reason }}
               </div>
@@ -616,7 +676,9 @@
                   <i class="fa fa-thumbs-up"></i>
                   {{ likedIds.includes(movie.movie_id) ? 'Liked' : 'Like' }}
                 </button>
-                <button class="btn-dislike" @click="dislikeMovie(movie.movie_id)">
+                <button class="btn-dislike"
+                        :class="{ disliked: dislikedIds.includes(movie.movie_id) }"
+                        @click="dislikeMovie(movie.movie_id)">
                   <i class="fa fa-thumbs-down"></i>
                 </button>
               </div>
@@ -625,14 +687,14 @@
         </div>
 
         <!-- CBF / feedback recs -->
-        <template v-if="feedbackRecs.length > 0">
+        <template v-if="visibleFeedbackRecs.length > 0">
           <div class="section-header mt-8">
             <div class="section-header-line"></div>
             <span class="section-header-label">Similar Picks Based on Likes</span>
             <div class="section-header-line"></div>
           </div>
           <div class="movies-grid">
-            <div class="movie-card" v-for="movie in feedbackRecs" :key="movie.movie_id">
+            <div class="movie-card" v-for="movie in visibleFeedbackRecs" :key="movie.movie_id">
               <div class="poster">
                 <div class="poster-fallback">
                   <i class="fa fa-film"></i>
@@ -650,6 +712,11 @@
                   <i class="fa fa-circle-nodes" style="font-size:.7rem"></i>
                   Similarity {{ (movie.similarity * 100).toFixed(0) }}%
                 </div>
+                <div class="reason-tags" v-if="movie.reason_tags && movie.reason_tags.length">
+                  <span class="reason-tag" v-for="tag in movie.reason_tags" :key="tag">
+                    <i class="fa fa-check"></i>{{ tag }}
+                  </span>
+                </div>
                 <div class="reason-box" v-if="movie.reason">
                   💡 {{ movie.reason }}
                 </div>
@@ -660,7 +727,9 @@
                     <i class="fa fa-thumbs-up"></i>
                     {{ likedIds.includes(movie.movie_id) ? 'Liked' : 'Like' }}
                   </button>
-                  <button class="btn-dislike" @click="dislikeMovie(movie.movie_id)">
+                  <button class="btn-dislike"
+                          :class="{ disliked: dislikedIds.includes(movie.movie_id) }"
+                          @click="dislikeMovie(movie.movie_id)">
                     <i class="fa fa-thumbs-down"></i>
                   </button>
                 </div>

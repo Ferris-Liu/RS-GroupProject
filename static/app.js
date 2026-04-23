@@ -34,6 +34,7 @@ createApp({
       // ── 推荐结果 ──
       mainRecs:     [],            // 协同过滤结果
       feedbackRecs: [],            // CBF 追加结果
+      feedbackSummary: [],         // 反馈后用于解释推荐列表变化的小面板
       likedIds:     [],
       dislikedIds:  [],
 
@@ -56,6 +57,12 @@ createApp({
     recommendations() {
       return [...this.mainRecs, ...this.feedbackRecs]
         .filter(m => !this.dislikedIds.includes(m.movie_id));
+    },
+    visibleMainRecs() {
+      return this.mainRecs.filter(m => !this.dislikedIds.includes(m.movie_id));
+    },
+    visibleFeedbackRecs() {
+      return this.feedbackRecs.filter(m => !this.dislikedIds.includes(m.movie_id));
     }
   },
 
@@ -180,6 +187,7 @@ createApp({
         const data = await res.json();
         this.mainRecs     = data.recommendations || [];
         this.feedbackRecs = [];
+        this.feedbackSummary = [];
         this.likedIds     = [];
         this.dislikedIds  = [];
         this.currentPage  = "result";
@@ -199,11 +207,18 @@ createApp({
       if (!this.likedIds.includes(movieId)) {
         this.likedIds.push(movieId);
       }
+      this.dislikedIds = this.dislikedIds.filter(id => id !== movieId);
     },
 
-    dislikeMovie(movieId) {
+    async dislikeMovie(movieId) {
       if (!this.dislikedIds.includes(movieId)) {
         this.dislikedIds.push(movieId);
+      }
+      this.likedIds = this.likedIds.filter(id => id !== movieId);
+
+      // 如果已经有正反馈，点 dislike 后立即刷新追加推荐与解释面板。
+      if (this.likedIds.length > 0) {
+        await this.fetchFeedbackRecs();
       }
     },
 
@@ -214,7 +229,10 @@ createApp({
         const res  = await fetch("/api/feedback", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ liked_movie_ids: this.likedIds })
+          body: JSON.stringify({
+            liked_movie_ids: this.likedIds,
+            disliked_movie_ids: this.dislikedIds
+          })
         });
         const data = await res.json();
         const newRecs = data.recommendations || [];
@@ -226,6 +244,7 @@ createApp({
         ]);
         const unique = newRecs.filter(m => !existingIds.has(m.movie_id));
         this.feedbackRecs = [...this.feedbackRecs, ...unique];
+        this.feedbackSummary = data.feedback_summary || [];
       } catch (e) {
         console.error(e);
       } finally {
@@ -242,6 +261,7 @@ createApp({
       this.hoverRatings = {};
       this.mainRecs     = [];
       this.feedbackRecs = [];
+      this.feedbackSummary = [];
       this.likedIds     = [];
       this.dislikedIds  = [];
     }
