@@ -213,9 +213,9 @@ project/
 
 | 成员 | 主要负责文件 |
 |------|-------------|
-| 梁皓哲 | `templates/index.html`, `static/app.js` |
-| 刘飞宇 | `recommender/collaborative.py`, `recommender/content_based.py` |
-| 李劲 | `flaskr/routes.py`, `recommender/engine.py`, `recommender/llm_helper.py` |
+| LHZ | `recommender/collaborative.py`, `templates/index.html`, `static/app.js` |
+| LFY | `recommender/content_based.py`, `flaskr/routes.py`, |
+| LJ |  `recommender/engine.py`, `recommender/llm_helper.py` |
 
 ### 依赖说明
 
@@ -437,9 +437,9 @@ project/
 
 | Member | Main Files |
 |--------|------------|
-| Haozhe LIANG | `templates/index.html`, `static/app.js` |
-| Feiyu LIU | `recommender/collaborative.py`, `recommender/content_based.py` |
-| Jing LI | `flaskr/routes.py`, `recommender/engine.py`, `recommender/llm_helper.py` |
+| LHZ | `recommender/collaborative.py`, `templates/index.html`, `static/app.js` |
+| LFY | `recommender/content_based.py`, `flaskr/routes.py`, |
+| LJ |  `recommender/engine.py`, `recommender/llm_helper.py` |
 
 ### Dependencies
 
