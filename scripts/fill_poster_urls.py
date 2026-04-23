@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-为 modern_movies.csv 补全或校验电影海报 URL。
+为电影 CSV 补全或校验电影海报 URL。
 
 默认只生成预览文件，不会覆盖原始 CSV。
 如果传入 --apply，会先生成 .bak 备份，再覆盖输入文件。
@@ -113,7 +113,7 @@ def write_movies(path: Path, rows: list[dict], fieldnames: list[str]) -> None:
 
 def parse_args() -> argparse.Namespace:
     parser = argparse.ArgumentParser(
-        description="Fill missing cover_url values in modern_movies.csv using TMDB."
+        description="Fill missing or broken cover_url values in a movie CSV using TMDB."
     )
     parser.add_argument("--input", type=Path, default=DEFAULT_INPUT, help="CSV file to read.")
     parser.add_argument(
@@ -126,6 +126,11 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument("--api-key", default=None, help="TMDB API key. Defaults to TMDB_API_KEY from .env/env.")
     parser.add_argument("--validate", action="store_true", help="Also validate existing non-empty cover_url values.")
     parser.add_argument("--force", action="store_true", help="Replace existing cover_url values too.")
+    parser.add_argument(
+        "--fix-invalid",
+        action="store_true",
+        help="When used with --validate, replace only existing cover_url values that fail validation.",
+    )
     parser.add_argument("--sleep", type=float, default=0.25, help="Delay between TMDB requests.")
     parser.add_argument("--timeout", type=float, default=8.0, help="HTTP timeout in seconds.")
     return parser.parse_args()
@@ -157,7 +162,7 @@ def main() -> int:
 
         if args.validate and cover_url and not check_url(cover_url, args.timeout):
             invalid_existing += 1
-            if args.force:
+            if args.force or args.fix_invalid:
                 cover_url = ""
                 row["cover_url"] = ""
 

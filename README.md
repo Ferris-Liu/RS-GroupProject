@@ -48,10 +48,12 @@ TMDB API Key 获取地址：https://www.themoviedb.org/settings/api
 
 #### 4. 放入数据集
 
-将以下文件放入 `data/` 或项目指定的数据目录：
+项目数据位于 `data/ml_data/`，核心文件包括：
 
 - `ratings.csv`：MovieLens 格式，包含 `userId, movieId, rating, timestamp`
 - `movie_info.csv`：电影信息，包含 `movieId, title, genres, year, cover_url, overview`
+- `modern_movies.csv`：额外的新片增量池，不参与原始评分矩阵训练
+- `genre.csv`：类型编号映射文件，当前推荐流程主要直接读取电影表中的 `genres` 字段
 
 #### 5. 启动服务
 
@@ -110,7 +112,7 @@ flask --app flaskr run --debug
 项目提供两个 TMDB 辅助脚本：
 
 - `scripts/sync_modern_movies.py`：从 TMDB 同步整份 modern movie catalog，自动生成 `modern_movies.csv`。
-- `scripts/fill_poster_urls.py`：只补全或校验已有 `modern_movies.csv` 中缺失的 `cover_url`。
+- `scripts/fill_poster_urls.py`：补全缺失海报 URL，并可校验、替换坏掉的 `cover_url`。
 
 先在 `.env` 中配置：
 
@@ -130,7 +132,7 @@ python scripts/sync_modern_movies.py --limit 50
 python scripts/sync_modern_movies.py --limit 50 --apply
 ```
 
-如果只想补全已有 CSV 的缺失海报 URL，预览生成结果：
+如果只想补全 `modern_movies.csv` 的缺失海报 URL，预览生成结果：
 
 ```bash
 python scripts/fill_poster_urls.py
@@ -145,7 +147,13 @@ python scripts/fill_poster_urls.py --apply
 同时检查已有 URL，发现坏链接时重新补：
 
 ```bash
-python scripts/fill_poster_urls.py --validate --force --apply
+python scripts/fill_poster_urls.py --validate --fix-invalid --apply
+```
+
+如果要检查并修复原始电影库中的坏海报链接，指定输入文件：
+
+```bash
+python scripts/fill_poster_urls.py --input data/ml_data/movie_info.csv --validate --fix-invalid --apply
 ```
 
 ### 解释性推荐与反馈机制
@@ -187,10 +195,18 @@ project/
 │   └── index.html            # Vue.js 前端页面
 ├── static/
 │   └── app.js                # Vue.js 逻辑
+├── scripts/
+│   ├── sync_modern_movies.py # 从 TMDB 同步新片池
+│   └── fill_poster_urls.py   # 补全/校验海报 URL
+├── docs/
+│   └── evaluation_plan.md    # 评测设计建议
 └── data/
-    ├── ratings.csv
-    ├── movie_info.csv
-    └── modern_movies.csv       # 增量新片池，不修改原始数据集
+    └── ml_data/
+        ├── ratings.csv
+        ├── movie_info.csv
+        ├── genre.csv
+        ├── README.md
+        └── modern_movies.csv  # 增量新片池，不修改原始数据集
 ```
 
 ### 分工说明
@@ -256,10 +272,12 @@ TMDB API key page: https://www.themoviedb.org/settings/api
 
 #### 4. Add the Dataset
 
-Place the following files into `data/` or the configured data directory:
+Project data is stored in `data/ml_data/`. The core files are:
 
 - `ratings.csv`: MovieLens-style ratings file with `userId, movieId, rating, timestamp`
 - `movie_info.csv`: Movie metadata with `movieId, title, genres, year, cover_url, overview`
+- `modern_movies.csv`: Incremental modern movie pool; it is not added to the original rating matrix
+- `genre.csv`: Genre-to-id mapping file; the current recommendation flow mainly reads genres directly from the movie tables
 
 #### 5. Run the Server
 
@@ -318,7 +336,7 @@ For formal demos or experiments, make sure the page shows `Ranking: KNN With Mea
 The project provides two TMDB helper scripts:
 
 - `scripts/sync_modern_movies.py`: Syncs the full modern movie catalog from TMDB and generates `modern_movies.csv`.
-- `scripts/fill_poster_urls.py`: Only fills or validates missing `cover_url` values in an existing `modern_movies.csv`.
+- `scripts/fill_poster_urls.py`: Fills missing poster URLs and can validate or replace broken `cover_url` values.
 
 First configure `.env`:
 
@@ -338,7 +356,7 @@ After checking the preview, overwrite `modern_movies.csv` and create a `.bak` ba
 python scripts/sync_modern_movies.py --limit 50 --apply
 ```
 
-If you only want to fill missing poster URLs in the existing CSV, preview the result:
+If you only want to fill missing poster URLs in `modern_movies.csv`, preview the result:
 
 ```bash
 python scripts/fill_poster_urls.py
@@ -353,7 +371,13 @@ python scripts/fill_poster_urls.py --apply
 Validate existing URLs and refill broken ones:
 
 ```bash
-python scripts/fill_poster_urls.py --validate --force --apply
+python scripts/fill_poster_urls.py --validate --fix-invalid --apply
+```
+
+To validate and repair broken poster links in the original movie catalog, pass the input file explicitly:
+
+```bash
+python scripts/fill_poster_urls.py --input data/ml_data/movie_info.csv --validate --fix-invalid --apply
 ```
 
 ### Explainable Recommendations and Feedback
@@ -395,10 +419,18 @@ project/
 │   └── index.html            # Vue.js frontend page
 ├── static/
 │   └── app.js                # Vue.js logic
+├── scripts/
+│   ├── sync_modern_movies.py # Syncs the modern movie pool from TMDB
+│   └── fill_poster_urls.py   # Fills/validates poster URLs
+├── docs/
+│   └── evaluation_plan.md    # Evaluation design notes
 └── data/
-    ├── ratings.csv
-    ├── movie_info.csv
-    └── modern_movies.csv       # Incremental modern movie pool
+    └── ml_data/
+        ├── ratings.csv
+        ├── movie_info.csv
+        ├── genre.csv
+        ├── README.md
+        └── modern_movies.csv  # Incremental modern movie pool
 ```
 
 ### Team Responsibilities
